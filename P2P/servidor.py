@@ -1,10 +1,11 @@
 from socket import *
-import binascii
+from parametros import *
 import sys
+import binascii
 
-adress=("localhost", 6005)
+
+
 server_socket = socket(AF_INET, SOCK_DGRAM)
-
 server_socket.bind(adress)
 requisicao, addr = server_socket.recvfrom(1024)
 
