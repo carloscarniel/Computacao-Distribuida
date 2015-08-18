@@ -7,6 +7,6 @@ client_socket = socket(AF_INET, SOCK_DGRAM)
 
 client_socket.sendto( "cheguei no servidor", adress)
 
-resposta, addr = client_socket.recvfrom(11111)
+resposta, addr = client_socket.recvfrom(1024)
 
 print resposta
