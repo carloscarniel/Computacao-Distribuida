@@ -15,11 +15,11 @@ lista_de_arquivos=funcoes.carregaArquivos(lista_de_arquivos)
 while(1):
 
 	print "escutando"
-	requisicao, addr = server_socket.recvfrom(1024)
+	requisicao, addr = server_socket.recvfrom(22222)
 	requisicao = json.loads(requisicao)
 
 	for i in lista_de_arquivos:
-		if  i['nome'] == "teste.rar":
+		if  i['nome'] == "teste.rar" and i['parte'] == requisicao['numero_parte'] :
 			resposta ={"tag":"DownloadResponse",
 			"tamanho_parte":len(i['data']),
 			"numero_parte":i['parte'],
