@@ -3,18 +3,28 @@ from parametros import *
 import sys
 import binascii
 import json
-
+import funcoes
 
 server_socket = socket(AF_INET, SOCK_DGRAM)
 server_socket.bind(adress)
-requisicao, addr = server_socket.recvfrom(1024)
-requisicao = json.loads(requisicao)
 
-print requisicao
-
-resposta ={"Peso":"ideal",
-		"Altura":"ok"
-		}
+lista_de_arquivos=[]
+lista_de_arquivos=funcoes.carregaArquivos(lista_de_arquivos)
 
 
-server_socket.sendto(json.dumps(resposta), addr)
+while(1):
+
+	print "escutando"
+	requisicao, addr = server_socket.recvfrom(1024)
+	requisicao = json.loads(requisicao)
+
+	for i in lista_de_arquivos:
+		if  i['nome'] == "teste.rar":
+			resposta ={"tag":"DownloadResponse",
+			"tamanho_parte":len(i['data']),
+			"numero_parte":i['parte'],
+			"numero_de_partes":i['totalPartes'],
+			"part": binascii.b2a_base64(i['data'])
+			}
+
+			server_socket.sendto(json.dumps(resposta), addr)
