@@ -1,3 +1,4 @@
+from parametros import *
 import math
 import os
 import glob
