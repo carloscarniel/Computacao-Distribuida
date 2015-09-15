@@ -29,23 +29,23 @@ def Cliente(mutex,listaPeers):
 			break
 		i+=1		
 	f.close()
-	if funcoes.hashDoArquivo(arquivo1) == funcoes.hashDoArquivo(arquivoFinal):
+	if funcoes.hashDoArquivo(arquivo) == funcoes.hashDoArquivo(arquivoFinal):
 		print 'Arquivo transferido e verificdo com sucesso'
 	printf("Finalizado Cliente")
 
 
 
 def Cliente2(mutex,listaPeers):
-	arquivo='teste.rar'
-	arquivoFinal='testando2.rar'
-	hashArquivoTeste1=funcoes.hashDoArquivo(arquivo)
+	arquivo2='teste2.rar'
+	arquivoFinal2='testando2.rar'
+	hashArquivoTeste2=funcoes.hashDoArquivo(arquivo2)
 	address=(parametros.ipServer, parametros.portServer)
 	client_socket = socket(AF_INET, SOCK_DGRAM)
 	i=0
-	f=open(arquivoFinal, "wb")
+	f=open(arquivoFinal2, "wb")
 	while(True):
 		data = { "tag": "DownloadRequest",
-				 "hash": hashArquivoTeste1,
+				 "hash": hashArquivoTeste2,
 				 "numero_parte": i
 				}
 		print i		
@@ -58,6 +58,6 @@ def Cliente2(mutex,listaPeers):
 			break
 		i+=1		
 	f.close()
-	if funcoes.hashDoArquivo(arquivo1) == funcoes.hashDoArquivo(arquivoFinal):
+	if funcoes.hashDoArquivo(arquivo2) == funcoes.hashDoArquivo(arquivoFinal2):
 		print 'Arquivo transferido e verificdo com sucesso'
 	printf("Finalizado Cliente")

@@ -10,7 +10,9 @@ import funcoes
 
 t1=0
 
-listaPeers = ""
+listaPeers = [{'ip': parametros.ipServer,
+			'port': parametros.portServer,
+			'hash': 'abcd'}]
 
 mutex=Lock()
 t1=Thread(target=servidor.Servidor, args=(mutex,listaPeers))
