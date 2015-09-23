@@ -4,7 +4,9 @@ import sys
 import binascii
 import json
 import funcoes
-
+import time
+import math
+import select
 
 def Cliente(mutex,listaPeers):
 	arquivo='teste.rar'
@@ -21,7 +23,7 @@ def Cliente(mutex,listaPeers):
 				}
 		print i		
 		client_socket.sendto( json.dumps(data), address)
-		resposta, addr = client_socket.recvfrom(30000)
+		resposta, addr = client_socket.recvfrom(3000)
 		resposta = json.loads(resposta)
 		f.write(binascii.a2b_base64(resposta['parte']))
 		print data
@@ -31,7 +33,7 @@ def Cliente(mutex,listaPeers):
 	f.close()
 	if funcoes.hashDoArquivo(arquivo) == funcoes.hashDoArquivo(arquivoFinal):
 		print 'Arquivo transferido e verificdo com sucesso'
-	printf("Finalizado Cliente")
+	print("Finalizado Cliente")
 
 
 
@@ -50,7 +52,7 @@ def Cliente2(mutex,listaPeers):
 				}
 		print i		
 		client_socket.sendto( json.dumps(data), address)
-		resposta, addr = client_socket.recvfrom(30000)
+		resposta, addr = client_socket.recvfrom(3000)
 		resposta = json.loads(resposta)
 		f.write(binascii.a2b_base64(resposta['parte']))
 		print data
@@ -60,4 +62,25 @@ def Cliente2(mutex,listaPeers):
 	f.close()
 	if funcoes.hashDoArquivo(arquivo2) == funcoes.hashDoArquivo(arquivoFinal2):
 		print 'Arquivo transferido e verificdo com sucesso'
-	printf("Finalizado Cliente")
+	print("Finalizado Cliente")
+
+def ClientePeers(mutex,listaPeers):
+
+	while(1):
+		j={"ip": parametros.ipClient, "port": parametros.portClient}
+		for i in listaPeers:
+			if i!=j:
+				address=(i['ip'], i['porta'])
+				client_socket = socket(AF_INET, SOCK_DGRAM)
+				data = {"tag": "GetPeersRequest",
+						"sender":{"ip":parametros.ipClient, 
+						"porta":parametros.portClient}
+						}
+				client_socket.sendto(json.dumps(data), address)
+				resposta, addr=client_socket.recvfrom(2500)	
+				lista = json.loads(resposta)
+				print lista['peers']
+				resposta = json.loads(resposta)
+				funcoes.appendLista(listaPeers,resposta['peers'], mutex)
+				print "foi2"
+	time.sleep(5)
