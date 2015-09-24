@@ -84,6 +84,7 @@ def addPeers(mutex, listaPeers, requisicao):
 			return
 	novo = {'ip': requisicao['sender']['ip'],
 			'porta': requisicao['sender']['porta'],
+			'hash': requisicao['sender']['hash']
 			}
 
 	data_string = json.dumps(novo)

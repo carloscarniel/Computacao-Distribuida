@@ -5,7 +5,7 @@ import binascii
 import json
 import funcoes
 import select
-
+import hashlib
 
 def Servidor(mutex,listaPeers):
 	address=(parametros.ipServer, parametros.portServer)
@@ -28,3 +28,4 @@ def Servidor(mutex,listaPeers):
 				 'peers': listaPeers
 			}
 			server_socket.sendto(json.dumps(data), addr)
+			

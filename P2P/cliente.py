@@ -7,6 +7,7 @@ import funcoes
 import time
 import math
 import select
+import hashlib
 
 def Cliente(mutex,listaPeers):
 	arquivo='teste.rar'
@@ -67,20 +68,21 @@ def Cliente2(mutex,listaPeers):
 def ClientePeers(mutex,listaPeers):
 
 	while(1):
-		j={"ip": parametros.ipClient, "port": parametros.portClient}
+		hasher = hashlib.sha256()
+		j={"ip": parametros.ipClient, "porta": parametros.portClient, "hash": hasher.hexdigest()}
 		for i in listaPeers:
 			if i!=j:
 				address=(i['ip'], i['porta'])
 				client_socket = socket(AF_INET, SOCK_DGRAM)
 				data = {"tag": "GetPeersRequest",
 						"sender":{"ip":parametros.ipClient, 
-						"porta":parametros.portClient}
+						"porta":parametros.portClient, "hash": hasher.hexdigest()}
 						}
-				client_socket.sendto(json.dumps(data), address)
+				client_socket.sendto(json.dumps(data), address)				
 				resposta, addr=client_socket.recvfrom(2500)	
 				lista = json.loads(resposta)
 				print lista['peers']
 				resposta = json.loads(resposta)
 				funcoes.appendLista(listaPeers,resposta['peers'], mutex)
 				print "foi2"
-	time.sleep(5)
+		time.sleep(5)
