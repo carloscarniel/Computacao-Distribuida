@@ -5,38 +5,30 @@ import binascii
 import json
 import funcoes
 import select
-
-#	teste=open('hashfinal.txt','wb')
-#	juca=funcoes.hashDoArquivo("testando.rar")
-#	teste.write(juca)
-#	teste.close()
+import hashlib
 
 
-
-def Servidor(mutex,listaPeers):
-	address=(parametros.ipServer, parametros.portServer)
+def Servidor(mutex,listaPeers,listaDeHashArquivos,listaDeHashPeers):
+	address = (parametros.ipClient, parametros.portClient) # address recebe ip e porta do cliente (local meu)
 	server_socket = socket(AF_INET, SOCK_DGRAM)
 	server_socket.bind(address)
-	lista_de_arquivos=[]
-	lista_de_arquivos=funcoes.carregaArquivos(lista_de_arquivos)
+	lista_de_arquivos=[] #lista de arquivos
+	lista_de_arquivos = funcoes.carregaArquivos(lista_de_arquivos) #chama funcao para carregar arquivos na 
 	while(1):
-		print "escutando"
-		requisicao, addr = server_socket.recvfrom(3000)
+		#print "Listening - Server"
+		requisicao, addr = server_socket.recvfrom(1024) # servidor recebe requisicao do cliente
 		requisicao = json.loads(requisicao)
-
-		for i in lista_de_arquivos:
-			if  i['hash_do_arquivo'] == requisicao['hash'] and i['parte'] == requisicao['numero_parte'] :
-				resposta ={"tag":"DownloadResponse",
-				"parte_hash":i['hash_da_parte'],
-				"tamanho_parte":len(i['data']),
-				"numero_parte":i['parte'],
-				"numero_de_partes":i['totalPartes'],
-				"parte": binascii.b2a_base64(i['data'])
-				}
-
-				print "parte_hash: ", resposta['parte_hash']
-				print "tamanho_parte: ",resposta['tamanho_parte']
-				print "numero_parte: ",resposta['numero_parte']
-				print "numero_de_partes: ", resposta['numero_de_partes']
-				
-				server_socket.sendto(json.dumps(resposta), addr)
+		# Verifica a TAG
+		if requisicao['tag'] == "RequisitarDownload":
+			resposta = json.dumps(funcoes.buscaDados(requisicao, lista_de_arquivos))
+			server_socket.sendto(resposta, addr)
+		if requisicao['tag'] == "ObterRequisicaoPeers":
+			funcoes.addPeers(mutex, listaPeers, requisicao) # vai adicionar peer na lista caso o ip do mesmo ainda nao conste nela - retirar teste
+			funcoes.insereListaPeers(mutex,requisicao, listaDeHashPeers)
+			data = { 'tag': "ObterRespostaPeers",
+				 'peers': listaPeers
+			}
+			server_socket.sendto(json.dumps(data), addr)
+		if requisicao['tag'] == "OferecerArquivo":
+			#print 'Hash inserir:', func.hashMod(requisicao['HashDoOf'])
+			funcoes.insereListaArquivos(mutex,requisicao, listaDeHashArquivos) #tenta inserir na lista de arquivos o peer que ofereceu o arquivo
