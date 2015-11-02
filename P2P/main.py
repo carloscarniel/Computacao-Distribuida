@@ -24,12 +24,12 @@ mutex = Lock()
 t1 = Thread(target=servidor.Servidor, args=(mutex,listaPeers,listaDeHashArquivos,listaDeHashPeers))
 t1.start()
 
-for i in range(50):
+for i in range(2):
 	t2 = Thread(target=testandoDHT.ClienteOffer, args=(mutex,listaDeHashArquivos,parametros.meuHash)) #no original(clienteNovo) param.: mutex,listaPeers,listaArquivos, config.meuHash
 	t2.start()
 	t2.join()
 
-for j in range(50):
+for j in range(2):
 	t3 = Thread(target=testandoDHT.ClientePeers, args=(mutex,parametros.meuHash)) #no original(clienteNovo) param.: mutex,listaPeers,config.meuHash
 	t3.start()
 	t3.join()
