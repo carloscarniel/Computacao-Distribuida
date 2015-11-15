@@ -1,0 +1,101 @@
+Main:
+(Inicializa a lista de Peers e a Lista de Arquivos.
+Imprime na tela o hash do peer local.
+Imprime na tela o hash do peer local em mod 4.
+Cadastra um servidor, através da criação de listaPeers (ip e porta  obtidos em parametros.py).
+Cria a thread t1, com servidor.py e a função Servidor como target e passando como parâmetro a listaPeers, a listaDeHashArquivos e a listaDeHashPeers já iniciadas)
+Cria a thread t2 em um laço de 50 iterações, com testandoDHT.py e a função ClienteOffer como target e passando como parâmetro a listaDeHashArquivos e meuHash.
+Cria a thread t3 em um laço de 50 iterações, com testandoDHT e a função ClienteOffer como target e passando como parâmetro meuHash.
+Cria a thread t4, com testandoDHT.py e a função reqListas como target e passando como parâmetro a listaDeHashPeers e a listaDeHashArquivos.
+)
+
+inicializaListaPeers:
+(Inicializa a lista de peers através do próprio hash obtido em parametros.py. meuHash é passado como parâmetro para hashMod(4), que retorna o hash equivalente em resto 4 (mod4). Uma lista então é criada, do tamanho do hash (tamanho 32) x 4, inicializando com 128 hashes e Peers quaisquer (Peer é inicializado com None).)
+
+inicializaListaArquivos:
+(Inicializa a lista de peers através do próprio hash obtido em parametros.py. meuHash é passado como parâmetro para hashMod(4), que retorna o hash equivalente em resto 4 (mod4). Uma lista então é criada, do tamanho do hash (tamanho 32) x 4, inicializando com 128 hashes e Peers quaisquer (Peer é inicializado com None).)
+
+hashMod4:
+(Recebe o hash de parametros.py e o transforma em binário. Após isso obtém o hash equivalente em mod4 (resto 4) e o retorna)
+
+
+Servidor:
+(Conecta ipClient e portClient de parametros.py com o servidor (server_socket.bind).
+Cria uma lista_de_arquivos.
+Carrega os arquivos na lista, chamando a função carregaArquivos passando lista_de_arquivos como parâmetro.
+Cria um laço permanente para 'escuta' de requisições do cliente.
+Recebe requisição do cliente. 
+Testa tags:
+Se a requisição for "DownloadRequest", a resposta enviada ao cliente será a parte desejada, obtida através da chamada à função buscaDados, que recebe como parâmetro a requisição e a lista_de_arquivos.
+Se a requisição for "GetPeersRequest", a função addPeers é chamada, enviando como parâmetro listaPeers(que contém informação sobre o servidor, e a requisição) para inserir o peer do requisitor caso ainda não estiver na lista.
+Depois, a a função insereListaPeers é invocada, sendo a requisição e a listaDeHashPeers passados como parâmetro.
+O Servidor então envia um formulário json com a tag "GetPeersResponse " e a listaPeers.
+Se a requisição for "OfferFile", a função insereListaArquivos é chamada, passando como parâmetro a requisição e a listaDeHashArquivos.
+
+
+
+carregaArquivos:
+(Procura por arquivos .rar presentes no diretório.
+Seta o arquivo para a posição inicial com seek(0,0).
+Obtém o total de partes, através da divisão do arquivo por partes de 8192 bytes.
+Enquanto não chegar ao fim do arquivo, lê linha a linha.
+Obtém o hash de cada linha, em hexadecimal.
+Adiciona a informação sobre a linha à lista_de_arquivos: hash do Arquivo, (obtido pela função hashDoArquivo), total de partes, obtido anteriormente pela divisão, parte ou número da parte, obtido a cada iteração, o hash da parte (linha) e a linha propriamente dita (os dados em binário).)
+)
+
+hashDoArquivo:
+(Lê blocos de 1024 bytes do arquivo e atualiza, a cada iteração (enquanto o arquivo não acabar), o hash armazenado em 'hasher', retornando o hash final em hexadecimal.)
+
+buscaDados:
+(Recebe a requisição e a lista_de_arquivos.
+Faz uma busca na lista_de_arquivos, comparando se o hash do arquivo presente na lista é igual ao hash da requisição e se o número da parte na lista é igual ao número da parte informado pela requisição.
+Caso for, retorna um formulário json contendo as informações: tag da requisição, hash da parte, tamanho da parte, número da parte, total de partes e a parte em si, em binário.)
+
+addPeers:
+(addPeers recebe a listaPeers (com informação apenas sobre o servidor na primeira vez em que é chamada), e a requisição. 
+Faz uma busca na listaPeers. Se o peer já estiver na lista, retorna. 
+Caso contrário, cria um formulário json contendo ip, porta e hash do nó requisitor, e o adiciona na listaPeers.
+
+insereListaPeers:
+
+(CONFERE QUANTOS NÚMEROS INICIAIS O HASH POSSUI EM COMUM COM O HASH DA LISTA. Recebe a requisição e a listaDeHashPeers como parâmetro.
+Obtém o hash em mod4 do arquivo sendo oferecido.
+Obtém o hash do nó local, sempre através de hashMod4.
+Cria um contador em 0. 
+Compara, se a primeira posição do hash local for igual a primeira posição do hash da requisição, incrementa o contador, e assim o faz até que os hashes forem iguais em suas posições.
+Se o contador for zero, ou seja, nem a primeira posição do hash local for igual ao hash da requisição, testa apenas com os 4 prefixos (0,1,2,3).
+Busca na listaDeHashPeers, se o hash da listaDeHashPeers for igual a primeira posição (0) do hash da requisição e o peer nessa posição estiver vazio (None), o peer é inserido na listaDeHashPeers.
+Se o contador não for zero, ou seja, existem caracteres iguais nos hashes, busca na listaDeHashPeers pela mesma parte do hash.
+Se encontrar, insere o peer na listaDeHashPeers.
+)
+
+insereListaArquivos
+
+(CONFERE QUANTOS NÚMEROS INICIAIS O HASH POSSUI EM COMUM COM O HASH DA LISTA. Recebe a requisição e a listaDeHashArquivos como parâmetro.
+Obtém o hash em mod4 do arquivo sendo oferecido.
+Obtém o hash do nó local, sempre através de hashMod4.
+Cria um contador em 0. 
+Compara, se a primeira posição do hash local for igual a primeira posição do hash da requisição, incrementa o contador, e assim o faz até que os hashes forem iguais em suas posições.
+Se o contador for zero, ou seja, nem a primeira posição do hash local for igual ao hash da requisição, testa apenas com os 4 prefixos (0,1,2,3).
+Busca na listaDeHashArquivos, se o hash da listaDeHashArquivos for igual a primeira posição (0) do hash da requisição e o peer nessa posição estiver vazio (None), o peer é inserido na listaDeHashArquivos.
+Se o contador não for zero, ou seja, existem caracteres iguais nos hashes, busca na listaDeHashArquivos pela mesma parte do hash.
+Se encontrar, insere o peer na listaDeHashArquivos.)
+
+ClienteOffer: 
+(Recebe a listaDeHashArquivos e meuHash.
+Hashs são gerados em 'h' e 'arq' e atualizados com valores randômicos entre 22 e 30 para 'h' e entre 20 e 200 para arq. )
+meuHash é então atualizado para h mas em hexadecimal. 
+Um formulário json é criado contendo a tag "OfferFile", e os atributos offerOwner contendo o ip do Cliente que requisitou, a porta com geração randômica da porta definida em parametros.py mais um número randômico entre 1 e 50 e meuHash. O Atributo offerHash também contém o hash definido em arq, simulando o hash de algum arquivo. 
+O formulário é então enviado.)
+
+ClientePeers:
+(Recebe meuHash.
+Um hash é gerado em 'h' e atualizado com valores randômicos entre 22 e 30. 
+Um formulário json é criado contendo a tag GetPeersRequest, e o atributo sender contendo ip do Cliente, porta do cliente e hash.
+O formulário é então enviado.)
+
+reqListas:
+(Cria um laço contínuo, que, a cada 5 segundos, imprime a lista atualizada de HashPeers e HashArquivos.)
+
+Observação: Muitas das funções do trabalho operam com o uso do mutex, que facilita o uso de threads e possibilita que as funções sejam executadas de forma isolada e atômica. Para resumir o funcionamento do sistema, o uso do mutex foi omitido.
+LINHA 119 funcoes.py ??
